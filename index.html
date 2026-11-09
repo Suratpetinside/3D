@@ -3,299 +3,417 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Virtual Store Mockup</title>
+    <title>3D Virtual Store Mockup</title>
     <style>
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
-            font-family: 'Kanit', sans-serif;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
 
-        body {
-            background-color: #1a1a1a;
-            color: #fff;
-            overflow-x: hidden;
+        body, html {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: #111;
         }
 
-        /* Top Navigation Bar */
+        /* ส่วนหัวและเนวิเกชันร้าน */
         header {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            padding: 20px 40px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 15px 30px;
-            background: rgba(0, 0, 0, 0.8);
-            position: fixed;
-            top: 0;
-            width: 100%;
-            z-index: 1000;
-            border-bottom: 1px solid #333;
+            z-index: 10;
+            background: linear-gradient(to bottom, rgba(0,0,0,0.7), transparent);
         }
 
         .logo {
-            font-size: 20px;
-            font-weight: bold;
             color: #ffcc00;
+            font-size: 24px;
+            font-weight: bold;
+            letter-spacing: 1px;
         }
 
-        .nav-categories {
+        .nav-links {
             display: flex;
             gap: 15px;
         }
 
         .nav-btn {
-            background: #333;
+            background: rgba(255, 255, 255, 0.2);
             border: none;
-            color: #fff;
-            padding: 8px 16px;
+            color: white;
+            padding: 10px 20px;
             border-radius: 20px;
             cursor: pointer;
             transition: 0.3s;
+            font-weight: 600;
         }
 
-        .nav-btn.active, .nav-btn:hover {
+        .nav-btn:hover, .nav-btn.active {
             background: #ffcc00;
             color: #000;
-            font-weight: bold;
         }
 
         .checkout-btn {
             background: #ff4757;
             color: white;
             border: none;
-            padding: 8px 20px;
+            padding: 10px 25px;
             border-radius: 20px;
             cursor: pointer;
             font-weight: bold;
+            transition: 0.3s;
         }
 
-        /* Virtual Store 3D Perspective Container */
+        .checkout-btn:hover {
+            background: #ff6b81;
+        }
+
+        /* พื้นที่จำลองร้านค้า 3D Perspective */
         .store-container {
+            width: 100vw;
             height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
             perspective: 1000px;
-            background: linear-gradient(135deg, #2c3e50, #000);
-            padding-top: 60px;
-        }
-
-        .aisle-scene {
-            width: 80%;
-            max-width: 1000px;
-            height: 70vh;
-            background: #ffeaa7;
-            border-radius: 15px;
-            position: relative;
             overflow: hidden;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.8);
-            border: 5px solid #d4ac0d;
+            position: relative;
+            background: #2c2c2c;
         }
 
-        /* Floor Grid */
+        .store-scene {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            transform-style: preserve-3d;
+            transition: transform 0.8s cubic-bezier(0.25, 1, 0.5, 1);
+        }
+
+        /* พื้นหลังร้าน ลวดลายตารางตึก */
         .floor {
             position: absolute;
-            bottom: 0;
-            width: 100%;
-            height: 40%;
-            background: repeating-linear-gradient(45deg, #c0392b 0, #c0392b 40px, #ecf0f1 40px, #ecf0f1 80px);
-            transform: rotateX(60deg);
-            transform-origin: bottom;
+            width: 300vw;
+            height: 300vh;
+            left: -100vw;
+            top: 50vh;
+            background: repeating-linear-gradient(45deg, #ddd, #ddd 40px, #bbb 40px, #bbb 80px);
+            transform: rotateX(80deg);
+            z-index: 1;
         }
 
-        /* Shelves */
-        .shelves {
+        .wall {
             position: absolute;
-            width: 100%;
-            height: 60%;
-            display: flex;
-            justify-content: space-around;
-            align-items: center;
-            padding: 20px;
+            width: 300vw;
+            height: 100vh;
+            left: -100vw;
+            top: -20vh;
+            background: #f4f4f4;
+            z-index: 0;
         }
 
-        .shelf-unit {
-            background: #8e44ad;
-            width: 40%;
-            height: 80%;
-            border-radius: 10px;
-            border: 4px solid #5b2c6f;
+        /* ชั้นวางสินค้า (Shelves) */
+        .shelf-row {
+            position: absolute;
+            width: 1200px;
+            height: 400px;
+            top: 30vh;
+            left: calc(50% - 600px);
+            display: flex;
+            justify-content: space-between;
+            transform-style: preserve-3d;
+            z-index: 2;
+        }
+
+        .shelf {
+            width: 350px;
+            height: 100%;
+            background: #8b5a2b;
+            border: 5px solid #5c3a21;
+            border-radius: 8px;
             display: flex;
             flex-direction: column;
             justify-content: space-around;
             align-items: center;
-            box-shadow: inset 0 10px 20px rgba(0,0,0,0.5);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+            position: relative;
         }
 
-        .product-item {
-            background: #fff;
-            color: #333;
-            padding: 10px 20px;
-            border-radius: 8px;
-            cursor: pointer;
+        .shelf-title {
+            position: absolute;
+            top: -35px;
+            background: #333;
+            color: #ffcc00;
+            padding: 5px 15px;
+            border-radius: 5px;
             font-weight: bold;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
-            transition: transform 0.2s, background 0.2s;
+        }
+
+        .shelf-level {
+            width: 90%;
+            height: 25%;
+            background: #a06b38;
+            border-bottom: 4px solid #4a2e19;
+            display: flex;
+            justify-content: space-around;
+            align-items: flex-end;
+            padding-bottom: 5px;
+        }
+
+        /* สินค้าบนชั้น */
+        .product-item {
+            width: 60px;
+            height: 70px;
+            background: #ffeb3b;
+            border-radius: 5px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+            font-size: 10px;
+            text-align: center;
+            font-weight: bold;
+            color: #333;
         }
 
         .product-item:hover {
-            transform: scale(1.1);
+            transform: scale(1.15) translateY(-5px);
+            box-shadow: 0 8px 16px rgba(0,0,0,0.4);
+            z-index: 5;
+        }
+
+        /* ป้ายควบคุมการเดินซ้าย-ขวา */
+        .controls {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 20px;
+            z-index: 10;
+        }
+
+        .control-btn {
+            background: white;
+            border: none;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            font-size: 20px;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            transition: 0.2s;
+        }
+
+        .control-btn:hover {
             background: #ffcc00;
         }
 
-        /* Product Modal Popup */
+        /* Modal รายละเอียดสินค้าเมื่อคลิก */
         .modal {
-            display: none;
             position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.7);
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.6);
+            display: flex;
             justify-content: center;
             align-items: center;
-            z-index: 2000;
+            z-index: 100;
+            opacity: 0;
+            pointer-events: none;
+            transition: 0.3s;
+        }
+
+        .modal.active {
+            opacity: 1;
+            pointer-events: auto;
         }
 
         .modal-content {
-            background: #fff;
-            color: #333;
+            background: white;
             padding: 30px;
             border-radius: 12px;
             width: 350px;
             text-align: center;
             position: relative;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.3);
         }
 
-        .modal-content h2 {
+        .modal-content h3 {
             margin-bottom: 10px;
-            color: #2c3e50;
+            color: #333;
         }
 
         .modal-content p {
-            margin-bottom: 20px;
             color: #666;
-        }
-
-        .price {
-            font-size: 22px;
-            color: #e74c3c;
-            font-weight: bold;
             margin-bottom: 20px;
+            font-size: 14px;
         }
 
-        .buy-btn {
-            background: #27ae60;
+        .add-to-cart-btn {
+            background: #ff4757;
             color: white;
             border: none;
             padding: 10px 20px;
-            border-radius: 5px;
-            cursor: pointer;
+            border-radius: 8px;
             font-weight: bold;
+            cursor: pointer;
             width: 100%;
         }
 
-        .close-btn {
+        .close-modal {
             position: absolute;
             top: 10px;
             right: 15px;
-            font-size: 20px;
+            background: none;
+            border: none;
+            font-size: 18px;
             cursor: pointer;
-            color: #999;
+            color: #aaa;
         }
     </style>
 </head>
 <body>
 
-    <!-- Header Menu -->
     <header>
-        <div class="logo">🛒 VIRTUAL MART</div>
-        <div class="nav-categories">
-            <button class="nav-btn active" onclick="switchCategory('snacks')">Snacks & Sweets</button>
-            <button class="nav-btn" onclick="switchCategory('drinks')">Drinks</button>
-            <button class="nav-btn" onclick="switchCategory('petfood')">Pet Food</button>
+        <div class="logo">PET'S STATION 3D</div>
+        <div class="nav-links">
+            <button class="nav-btn active" onclick="moveStore(0)">โซนอาหารเม็ด</button>
+            <button class="nav-btn" onclick="moveStore(1)">โซนขนมขบเคี้ยว</button>
+            <button class="nav-btn" onclick="moveStore(2)">โซนของเล่น</button>
         </div>
-        <button class="checkout-btn">Checkout (0)</button>
+        <button class="checkout-btn" onclick="alert('ไปที่หน้าชำระเงิน (ตะกร้าสินค้า)')">🛒 ตะกร้าสินค้า</button>
     </header>
 
-    <!-- 3D Store View -->
     <div class="store-container">
-        <div class="aisle-scene">
-            <div class="shelves" id="shelfArea">
-                <!-- สินค้าบนชั้นจะถูกเปลี่ยนด้วย JavaScript ตามหมวดหมู่ -->
-            </div>
+        <div class="store-scene" id="storeScene">
+            <div class="wall"></div>
             <div class="floor"></div>
+
+            <!-- ชั้นวางสินค้าจำลอง -->
+            <div class="shelf-row">
+                <!-- ชั้นที่ 1 -->
+                <div class="shelf">
+                    <div class="shelf-title">อาหารสุนัข & แมว</div>
+                    <div class="shelf-level">
+                        <div class="product-item" onclick="openModal('Royal Canin', 'อาหารสูตรพรีเมียม บำรุงขนและผิวหนัง', '450.-')">Royal Canin</div>
+                        <div class="product-item" onclick="openModal('Imperial Paw', 'อาหารแมวเกรดโฮลิสติก โซเดียมต่ำ', '380.-')">Imperial Paw</div>
+                    </div>
+                    <div class="shelf-level">
+                        <div class="product-item" onclick="openModal('Bite of Wild', 'อาหารเม็ดสูตรธรรมชาติ ไร้ธัญพืช', '520.-')">Bite of Wild</div>
+                        <div class="product-item" onclick="openModal('Kinno อาหารเปียก', 'ซองละมุน หอมอร่อยถูกใจน้องแมว', '25.-')">Kinno ซอง</div>
+                    </div>
+                    <div class="shelf-level">
+                        <div class="product-item" onclick="openModal('Prowild เม็ดแมว', 'โปรตีนสูง เสริมสร้างกล้ามเนื้อ', '420.-')">Prowild</div>
+                        <div class="product-item" onclick="openModal('Sunpo ทรายแมว', 'ทรายแมวเต้าหู้ไร้ฝุ่น จับตัวเป็นก้อนไว', '220.-')">ทรายเต้าหู้</div>
+                    </div>
+                </div>
+
+                <!-- ชั้นที่ 2 -->
+                <div class="shelf">
+                    <div class="shelf-title">ขนมและวิตามิน</div>
+                    <div class="shelf-level">
+                        <div class="product-item" onclick="openModal('แมวเลียสูตรพิเศษ', 'เพิ่มวิตามินและทอรีน บำรุงสายตา', '65.-')">แมวเลีย</div>
+                        <div class="product-item" onclick="openModal('ขนมขัดฟันสุนัข', 'ลดคราบหินปูน ลมหายใจสดชื่น', '120.-')">ขนมขัดฟัน</div>
+                    </div>
+                    <div class="shelf-level">
+                        <div class="product-item" onclick="openModal('สเปรย์ Silver Nano', 'พ่นดับกลิ่นฆ่าเชื้อ ปลอดภัยต่อน้อง', '180.-')">Silver Nano</div>
+                        <div class="product-item" onclick="openModal('Ceramectin หยดหลัง', 'ป้องกันเห็บหมัดและพยาธิหนอนหัวใจ', '290.-')">Ceramectin</div>
+                    </div>
+                    <div class="shelf-level">
+                        <div class="product-item" onclick="openModal('แคทนิปแท้', 'ผงกัญชาแมว ผ่อนคลายอารมณ์ดี', '89.-')">แคทนิป</div>
+                        <div class="product-item" onclick="openModal('ขนมฟรีซอดัด', 'เนื้อไก่แท้ 100% อบแห้ง', '150.-')">ฟรีซดราย</div>
+                    </div>
+                </div>
+
+                <!-- ชั้นที่ 3 -->
+                <div class="shelf">
+                    <div class="shelf-title">ของเล่น & อุปกรณ์</div>
+                    <div class="shelf-level">
+                        <div class="product-item" onclick="openModal('ไม้ล่อแมวขนนก', 'กระตุ้นสัญชาตญาณนักล่า', '79.-')">ไม้ล่อแมว</div>
+                        <div class="product-item" onclick="openModal('ลูกบอลแมวมีเสียง', 'กลิ้งสนุกมีเสียงกระดิ่งด้านใน', '45.-')">ลูกบอล</div>
+                    </div>
+                    <div class="shelf-level">
+                        <div class="product-item" onclick="openModal('อุโมงค์แมวพับได้', 'ที่หลบภัยสุดโปรดของแก๊งแมวป่วน', '250.-')">อุโมงค์แมว</div>
+                        <div class="product-item" onclick="openModal('ที่ลับเล็บกระดาษลูกฟูก', 'ลับเล็บมันส์ ทนทานพิเศษ', '199.-')">ที่ลับเล็บ</div>
+                    </div>
+                    <div class="shelf-level">
+                        <div class="product-item" onclick="openModal('ปลอกคอกระดิ่งแฟชั่น', 'น่ารัก สีนอนพาสเทล นุ่มไม่บาดคอ', '60.-')">ปลอกคอ</div>
+                        <div class="product-item" onclick="openModal('ชามอาหารสแตนเลส', 'ฐานกันลื่น ทำความสะอาดง่าย', '110.-')">ชามอาหาร</div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
-    <!-- Product Detail Modal -->
+    <!-- ปุ่มเลื่อนซ้ายขวาจำลองการเดิน -->
+    <div class="controls">
+        <button class="control-btn" onclick="slideStore('left')">◀</button>
+        <button class="control-btn" onclick="slideStore('right')">▶</button>
+    </div>
+
+    <!-- Modal รายละเอียดสินค้า -->
     <div class="modal" id="productModal">
         <div class="modal-content">
-            <span class="close-btn" onclick="closeModal()">&times;</span>
-            <h2 id="modalTitle">ชื่อสินค้า</h2>
-            <p id="modalDesc">รายละเอียดสินค้าจำลองเสมือนจริง</p>
-            <div class="price" id="modalPrice">฿ 99</div>
-            <button class="buy-btn" onclick="addToCart()">Add to Cart</button>
+            <button class="close-modal" onclick="closeModal()">×</button>
+            <h3 id="modalTitle">ชื่อสินค้า</h3>
+            <p id="modalDesc">รายละเอียดสินค้า</p>
+            <h4 id="modalPrice" style="color: #ff4757; margin-bottom: 15px;">ราคา</h4>
+            <button class="add-to-cart-btn" onclick="addToCart()">หยิบใส่ตะกร้า</button>
         </div>
     </div>
 
     <script>
-        // ข้อมูลสินค้าจำลองตามหมวดหมู่
-        const storeData = {
-            snacks: [
-                { name: "🍪 Cookie Crunch", desc: "คุกกี้ช็อกโกแลตชิพสูตรพิเศษ กรอบอร่อย", price: "฿ 120" },
-                { name: "🍫 Taro Spicy", desc: "ปลาเส้นทาโร่รสเผ็ดแซ่บสะใจ", price: "฿ 85" },
-                { name: "🍬 Jelly Joy", desc: "เยลลี่ผลไม้รวมหนпหนุบหนับ", price: "฿ 60" }
-            ],
-            drinks: [
-                { name: "🧋 Matcha Day", desc: "ชาเขียวมัทฉะแท้จากญี่ปุ่น หอมกลมกล่อม", price: "฿ 95" },
-                { name: "🥤 Soda Pop", desc: "น้ำอัดลมซ่าชื่นใจ ดับกระหาย", price: "฿ 35" }
-            ],
-            petfood: [
-                { name: "🐱 Premium Cat Food", desc: "อาหารเม็ดพรีเมียม บำรุงขนและผิวหนัง", price: "฿ 250" },
-                { name: "🐟 Creamy Treat", desc: "ขนมแมวเลียรสปลาทูน่าย่างหอมละมุน", price: "฿ 45" }
-            ]
-        };
+        let currentPosition = 0;
 
-        function switchCategory(category) {
-            // เปลี่ยนปุ่ม Active
-            document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
-            event.target.classList.add('active');
+        function moveStore(zoneIndex) {
+            const scene = document.getElementById('storeScene');
+            const buttons = document.querySelectorAll('.nav-btn');
+            
+            buttons.forEach(btn => btn.classList.remove('active'));
+            buttons[zoneIndex].classList.add('active');
 
-            // เรนเดอร์สินค้าบนชั้นวาง
-            const shelfArea = document.getElementById('shelfArea');
-            shelfArea.innerHTML = '';
+            if (zoneIndex === 0) currentPosition = 0;
+            if (zoneIndex === 1) currentPosition = -400;
+            if (zoneIndex === 2) currentPosition = -800;
 
-            const items = storeData[category];
-            let html = '<div class="shelf-unit">';
-            items.forEach((item, index) => {
-                html += `<div class="product-item" onclick="openModal('${item.name}', '${item.desc}', '${item.price}')">${item.name}</div>`;
-                if(index === 1 && items.length > 2) {
-                    html += `</div><div class="shelf-unit">`;
-                }
-            });
-            html += `</div>`;
-            shelfArea.innerHTML = html;
+            scene.style.transform = `translateX(${currentPosition}px) translateZ(100px)`;
         }
 
-        function openModal(name, desc, price) {
-            document.getElementById('modalTitle').innerText = name;
+        function slideStore(direction) {
+            const scene = document.getElementById('storeScene');
+            if (direction === 'left' && currentPosition < 400) {
+                currentPosition += 400;
+            } else if (direction === 'right' && currentPosition > -800) {
+                currentPosition -= 400;
+            }
+            scene.style.transform = `translateX(${currentPosition}px) translateZ(100px)`;
+        }
+
+        function openModal(title, desc, price) {
+            document.getElementById('modalTitle').innerText = title;
             document.getElementById('modalDesc').innerText = desc;
             document.getElementById('modalPrice').innerText = price;
-            document.getElementById('productModal').style.display = 'flex';
+            document.getElementById('productModal').classList.add('active');
         }
 
         function closeModal() {
-            document.getElementById('productModal').style.display = 'none';
+            document.getElementById('productModal').classList.remove('active');
         }
 
         function addToCart() {
-            alert('เพิ่มสินค้าลงตะกร้าเรียบร้อยแล้วครับ!');
+            alert('เพิ่มสินค้าลงในตะกร้าเรียบร้อย!');
             closeModal();
         }
-
-        // โหลดหมวดหมู่แรกตอนเปิดเว็บ
-        window.onload = () => {
-            switchCategory('snacks');
-        };
     </script>
 </body>
 </html>
